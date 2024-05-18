@@ -44,31 +44,37 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/account", makeHTTPHandleFunc(s.handleAccount))
 
+	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.handleGetAccount))
+
 	log.Println("JSON API Server running on port: ", s.listenAddr)
 
-  if err := http.ListenAndServe(s.listenAddr, router); err != nil {
-    log.Fatalf("failed to start server: %v", err)
-  }
+	if err := http.ListenAndServe(s.listenAddr, router); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }
 
 func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error {
-  if r.Method == "GET" {
-    return s.handleGetAccount(w, r)
-  }
+	if r.Method == "GET" {
+		return s.handleGetAccount(w, r)
+	}
 
-  if r.Method == "POST" {
-    return s.handleCreateAccount(w, r)
-  }
+	if r.Method == "POST" {
+		return s.handleCreateAccount(w, r)
+	}
 
-  if r.Method == "DELETE" {
-    return s.handleDeleteAccount(w, r)
-  }
+	if r.Method == "DELETE" {
+		return s.handleDeleteAccount(w, r)
+	}
 
-  return fmt.Errorf("method not allowed %s", r.Method)
+	return fmt.Errorf("method not allowed %s", r.Method)
 }
 
 func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) error {
-	return nil
+  id := mux.Vars(r)["id"]
+
+  fmt.Println(id)
+
+	return WriteJSON(w, http.StatusOK, &Account{})
 }
 
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
