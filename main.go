@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 )
 
 func main() {
@@ -10,10 +11,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-  if err := store.Init(); err != nil {
-    log.Fatal(err)
-  }
+	if err := store.Init(); err != nil {
+		log.Fatal(err)
+	}
 
-	server := NewAPIServer(":3000", store)
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("PORT not set in .env")
+	}
+
+	server := NewAPIServer(":" + port, store)
 	server.Run()
 }
+
