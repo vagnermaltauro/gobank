@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -52,21 +53,27 @@ func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error 
 }
 
 func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) error {
-  accounts, err := s.store.GetAccounts()
-  if err != nil {
-    return err
-  }
+	accounts, err := s.store.GetAccounts()
+	if err != nil {
+		return err
+	}
 
-  return WriteJSON(w, http.StatusOK, accounts)
+	return WriteJSON(w, http.StatusOK, accounts)
 }
 
-
 func (s *APIServer) handleGetAccountByID(w http.ResponseWriter, r *http.Request) error {
-	id := mux.Vars(r)["id"]
+	idStr := mux.Vars(r)["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return fmt.Errorf("invalid id %s", idStr)
+	}
 
-	fmt.Println(id)
+	account, err := s.store.GetAccountByID(id)
+	if err != nil {
+		return err
+	}
 
-	return WriteJSON(w, http.StatusOK, &Account{})
+	return WriteJSON(w, http.StatusOK, account)
 }
 
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
@@ -75,10 +82,10 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-  account := NewAccount(createAccountReq.FirstName, createAccountReq.LastName)
-  if err := s.store.CreateAccount(account); err != nil {
-    return err;
-  }
+	account := NewAccount(createAccountReq.FirstName, createAccountReq.LastName)
+	if err := s.store.CreateAccount(account); err != nil {
+		return err
+	}
 
 	return WriteJSON(w, http.StatusOK, account)
 }
