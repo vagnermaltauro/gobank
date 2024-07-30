@@ -3,6 +3,8 @@ package main
 import (
 	"math/rand"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type CreateAccountRequest struct {
@@ -30,11 +32,17 @@ type TransferRequest struct {
 	Amount    int `json:"amount"`
 }
 
-func NewAccount(firstName, lastName, password string) *Account {
-	return &Account{
-		FirstName: firstName,
-		LastName:  lastName,
-		Number:    int64(rand.Intn(1000000)),
-		CreatedAt: time.Now().UTC(),
+func NewAccount(firstName, lastName, password string) (*Account, error) {
+	encpw, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Account{
+		FirstName:         firstName,
+		LastName:          lastName,
+		EncryptedPassword: string(encpw),
+		Number:            int64(rand.Intn(1000000)),
+		CreatedAt:         time.Now().UTC(),
+	}, nil
 }
