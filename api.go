@@ -27,6 +27,7 @@ func NewAPIServer(listenAddr string, store Storage) *APIServer {
 func (s *APIServer) Run() {
 	router := mux.NewRouter()
 
+	router.HandleFunc("/login", makeHTTPHandleFunc(s.handleLogin))
 	router.HandleFunc("/account", makeHTTPHandleFunc(s.handleAccount))
 	router.HandleFunc("/account/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetAccountByID), s.store))
 	router.HandleFunc("/transfer", makeHTTPHandleFunc(s.handleTransfer))
@@ -36,6 +37,15 @@ func (s *APIServer) Run() {
 	if err := http.ListenAndServe(s.listenAddr, router); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
+}
+
+func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
+  var req LoginRequest
+  if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+    return err
+  }
+
+  return WriteJSON(w, http.StatusOK, req)
 }
 
 func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error {
@@ -177,7 +187,7 @@ func withJWTAuth(handleFunc http.HandlerFunc, s Storage) http.HandlerFunc {
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
-    // panic(reflect.TypeOf(claims["accountNumber"]))
+		// panic(reflect.TypeOf(claims["accountNumber"]))
 		if account.Number != int64(claims["accountNumber"].(float64)) {
 			permissionDenied(w)
 			return
