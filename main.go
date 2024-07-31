@@ -5,6 +5,25 @@ import (
 	"os"
 )
 
+func seedAccount(store Storage, fname, lname, pw string) *Account {
+	acc, err := NewAccount(fname, lname, pw)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := store.CreateAccount(acc); err != nil {
+		log.Fatal(err)
+	}
+
+	return acc
+}
+
+func seedAccounts(store Storage) {
+  seedAccount(store, "Alice", "Smith", "password")
+  seedAccount(store, "Bob", "Smith", "password")
+  seedAccount(store, "Charlie", "Smith", "password")
+}
+
 func main() {
 	store, err := NewPostgresStore()
 	if err != nil {
@@ -20,7 +39,9 @@ func main() {
 		log.Fatal("PORT not set in .env")
 	}
 
-	server := NewAPIServer(":" + port, store)
+  // seed accounts
+  seedAccounts(store)
+
+	server := NewAPIServer(":"+port, store)
 	server.Run()
 }
-
