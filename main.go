@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 
-  "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 )
 
 func seedAccount(store Storage, fname, lname, pw string) *Account {
@@ -17,20 +19,25 @@ func seedAccount(store Storage, fname, lname, pw string) *Account {
 		log.Fatal(err)
 	}
 
+  fmt.Println("Created account:", acc)
+
 	return acc
 }
 
 func seedAccounts(store Storage) {
-  seedAccount(store, "Alice", "Smith", "password")
-  seedAccount(store, "Bob", "Smith", "password")
-  seedAccount(store, "Charlie", "Smith", "password")
+	seedAccount(store, "Alice", "Smith", "password")
+	seedAccount(store, "Bob", "Smith", "password")
+	seedAccount(store, "Charlie", "Smith", "password")
 }
 
 func main() {
-  err := godotenv.Load()
-  if err != nil {
-    log.Fatal("Error loading .env file")
-  }
+	seed := flag.Bool("seed", false, "seed database")
+	flag.Parse()
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	store, err := NewPostgresStore()
 	if err != nil {
@@ -46,8 +53,11 @@ func main() {
 		log.Fatal("PORT not set in .env")
 	}
 
-  // seed accounts
-  seedAccounts(store)
+	// seed accounts
+	if *seed {
+		fmt.Println("Seeding database")
+		seedAccounts(store)
+	}
 
 	server := NewAPIServer(":"+port, store)
 	server.Run()
