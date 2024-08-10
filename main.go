@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"os"
+
+  "github.com/joho/godotenv"
 )
 
 func seedAccount(store Storage, fname, lname, pw string) *Account {
@@ -25,6 +27,11 @@ func seedAccounts(store Storage) {
 }
 
 func main() {
+  err := godotenv.Load()
+  if err != nil {
+    log.Fatal("Error loading .env file")
+  }
+
 	store, err := NewPostgresStore()
 	if err != nil {
 		log.Fatal(err)
