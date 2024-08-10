@@ -6,9 +6,6 @@ For start project:
 
 in your terminal run: <br />
 ```
-export PORT=3000
-```
-```
 export JWT_SECRET=hunter999
 ```
 
