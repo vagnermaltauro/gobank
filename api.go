@@ -40,14 +40,21 @@ func (s *APIServer) Run() {
 }
 
 func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
-  if r.Method != "POST" {
-    return fmt.Errorf("method not allowed %s", r.Method)
-  }
+	if r.Method != "POST" {
+		return fmt.Errorf("method not allowed %s", r.Method)
+	}
 
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return err
 	}
+
+	acc, err := s.store.GetAccountByNumber(int(req.Number))
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("%v\n", acc)
 
 	return WriteJSON(w, http.StatusOK, req)
 }
