@@ -1,4 +1,7 @@
-build:
+deps:
+	@go mod download
+
+build: deps
 	@go build -o bin/gobank
 
 run: build
@@ -6,5 +9,5 @@ run: build
 	sleep 5
 	@./bin/gobank
 
-test:
+test: deps
 	@go test -v ./...
